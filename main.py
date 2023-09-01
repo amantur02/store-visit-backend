@@ -6,7 +6,6 @@ from core.constants import PROD
 from fastapi import FastAPI, Request
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
-from fastapi.staticfiles import StaticFiles
 from middlewares import add_process_time_header
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.cors import CORSMiddleware
@@ -22,9 +21,6 @@ openapi_url = (
 
 
 app = FastAPI(title=settings.project_name, openapi_url=openapi_url)
-
-
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 app.include_router(api_router, prefix=settings.api_v1_path)
