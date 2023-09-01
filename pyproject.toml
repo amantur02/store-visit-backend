@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "store-visit-backend"
+version = "0.1.0"
+description = "An API for a mobile application where a customer's field employee will conduct visits to stores."
+authors = ["amantur02 <amantur.ubaid@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.group.dev.dependencies]
+"fastapi," = "pydantic"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
