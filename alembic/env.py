@@ -30,7 +30,7 @@ from core.config import settings
 
 
 def get_url():
-    return settings.SQLALCHEMY_DATABASE_URI
+    return settings.SQLALCHEMY_DATABASE_URL
 
 
 def exclude_tables_from_config(config_):
