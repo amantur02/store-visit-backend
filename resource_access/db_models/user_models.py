@@ -16,3 +16,4 @@ class UserDB(Base):
         ForeignKey("stores.id", ondelete="RESTRICT"),
         nullable=True,
     )
+    hashed_password = Column(String(300))
