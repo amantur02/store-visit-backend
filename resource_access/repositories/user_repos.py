@@ -1,14 +1,43 @@
+import logging
+
+from psycopg2.errorcodes import UNIQUE_VIOLATION
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from exceptions import NotFoundException
+from exceptions import NotFoundException, AlreadyExistsException
 from resource_access.db_models.user_models import UserDB
 from schemas.user_schemas import User
+
+
+logger = logging.getLogger(__name__)
 
 
 class UserRepository:
     def __init__(self, db_session: Session):
         self._db_session = db_session
+
+    async def create_user(
+        self, user: User
+    ) -> User:
+        user_db = UserDB(
+            **user.model_dump(exclude_unset=True, exclude={'id'}),
+        )
+        self._db_session.add(user_db)
+        try:
+            await self._db_session.commit()
+            await self._db_session.refresh(user_db)
+            return User.model_validate(user_db)
+        except IntegrityError as e:
+            logger.error(
+                f"Error while creating User, details: {e.orig.args}"
+            )
+            await self._db_session.rollback()
+            if e.orig.sqlstate == UNIQUE_VIOLATION:
+                if "username" in e.orig.args[0]:
+                    raise AlreadyExistsException(
+                        f"User with username '{user.username}' already exist"
+                    )
 
     async def get_user_by_username(self, username: str) -> User:
         query = await self._db_session.execute(

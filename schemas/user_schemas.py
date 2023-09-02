@@ -16,6 +16,21 @@ class User(BaseModel):
         from_attributes = True
 
 
+class UserIn(BaseModel):
+    username: str
+    first_name: str
+    role: UserRoleEnum
+    store_id: int
+    password: str
+
+
+class UserOut(BaseModel):
+    username: str
+    first_name: str
+    role: UserRoleEnum
+    store_id: int
+
+
 class UserLoginIn(BaseModel):
     username: str
     password: str

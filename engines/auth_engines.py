@@ -14,3 +14,7 @@ class AuthenticationEngine:
             valid = pwd_context.verify(password, user.hashed_password)
         if not valid:
             raise AuthenticationError(message="Wrong password")
+
+    @staticmethod
+    async def get_password_hash(password: str) -> str:
+        return pwd_context.hash(password)

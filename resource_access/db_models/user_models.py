@@ -1,5 +1,6 @@
 from sqlalchemy import Column, String, Integer, ForeignKey
 from sqlalchemy.dialects.postgresql import ENUM
+from sqlalchemy.orm import relationship
 
 from resource_access.db_base_class import Base
 from schemas.enums import UserRoleEnum
@@ -17,3 +18,10 @@ class UserDB(Base):
         nullable=True,
     )
     hashed_password = Column(String(300))
+
+    store = relationship(
+        'StoreDB',
+        back_populates='users',
+        lazy='selectin',
+        uselist=False,
+    )

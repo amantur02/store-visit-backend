@@ -12,9 +12,9 @@ class StoreDB(Base):
 
     title = Column(String(255), nullable=False)
 
-    products = relationship(
-        'UserDb',
-        back_populates='organization',
+    users = relationship(
+        'UserDB',
+        back_populates='store',
         lazy='selectin',
         uselist=True,
     )

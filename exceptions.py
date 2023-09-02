@@ -25,3 +25,8 @@ class NotFoundException(StoreVisitException):
 class AuthenticationError(StoreVisitException):
     default_message = "Wrong login or password"
     error_code = "AuthenticationError"
+
+
+class AlreadyExistsException(StoreVisitException):
+    message = "Already Exists"
+    error_code = "DataAlreadyExistsError"
