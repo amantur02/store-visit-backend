@@ -14,7 +14,7 @@ from exceptions import StoreVisitHTTPException
 dictConfig(logging_conf)
 
 openapi_url = (
-    f"{settings.api_v1_path}/openapi.json"
+    f"{settings.api_path}/openapi.json"
     if settings.environment != PROD
     else ""
 )
@@ -23,12 +23,12 @@ openapi_url = (
 app = FastAPI(title=settings.project_name, openapi_url=openapi_url)
 
 
-app.include_router(api_router, prefix=settings.api_v1_path)
+app.include_router(api_router, prefix=settings.api_path)
 app.add_middleware(BaseHTTPMiddleware, dispatch=add_process_time_header)
 
 
 @app.exception_handler(StoreVisitHTTPException)
-async def bank_exception_handler(_: Request, exc: StoreVisitHTTPException):
+async def store_visit_exception_handler(_: Request, exc: StoreVisitHTTPException):
     return JSONResponse(
         status_code=exc.status_code,
         content={"message": exc.message, "error_code": exc.error_code},

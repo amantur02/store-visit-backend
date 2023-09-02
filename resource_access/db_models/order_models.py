@@ -4,6 +4,7 @@ from sqlalchemy.orm import relationship
 
 from resource_access.db_base_class import Base
 from schemas.enums import OrderStatusEnum
+from user_models import UserDB
 
 
 class StoreDB(Base):
