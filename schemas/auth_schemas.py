@@ -11,3 +11,7 @@ class TokenSchema(BaseModel):
     access_token: Optional[str]
     refresh_token: Optional[str]
     token_type: Optional[str]
+
+
+class SuccessResponse(BaseModel):
+    message: str

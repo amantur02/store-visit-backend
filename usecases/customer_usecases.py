@@ -47,7 +47,9 @@ async def get_orders_usecase(db_session: Session, filters: OrderFilter, user: Us
 
 async def update_order_usecase(db_session: Session, order: Order) -> Order:
     order_repo = OrderRepository(db_session)
-    order = await order_repo.update_order(order)
-    print(order)
-    return order
+    return await order_repo.update_order(order)
 
+
+async def delete_order_usecase(db_session: Session, order_id: int) -> None:
+    order_repo = OrderRepository(db_session)
+    return await order_repo.delete_order(order_id)

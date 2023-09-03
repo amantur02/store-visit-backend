@@ -78,6 +78,15 @@ class OrderRepository:
             await self._db_session.rollback()
             await self.__integrity_error_handler(error, order)
 
+    async def delete_order(
+        self, order_id: int
+    ) -> None:
+        order_db = await self._get_order_by_id(
+            order_id
+        )
+        order_db.is_deleted = True
+        await self._db_session.commit()
+
     async def _get_order_by_id(self, order_id: int) -> Order:
         stmt = select(OrderDB).where(
             OrderDB.id == order_id, OrderDB.is_deleted.is_(False)
