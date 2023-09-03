@@ -1,8 +1,10 @@
 from datetime import datetime, timezone
 from typing import Optional, List
 
-from pydantic import BaseModel
+from pydantic import BaseModel, root_validator, model_validator
+from typing_extensions import Any
 
+from exceptions import DataValidationException
 from schemas.enums import OrderStatusEnum
 from schemas.user_schemas import User
 
@@ -51,3 +53,16 @@ class OrderOut(BaseModel):
 class OrderFilter(BaseModel):
     my_order: bool
     status: OrderStatusEnum
+
+
+class OrderUpdateIn(BaseModel):
+    expires_at: Optional[datetime] = None
+    store_id: Optional[int] = None
+    worker_id: Optional[int] = None
+
+    @model_validator(mode='before')
+    @classmethod
+    def at_least_one_field(cls, data: Any) -> Any:
+        if all(value is None for value in data.values()):
+            raise DataValidationException("At least one field must be provided")
+        return data

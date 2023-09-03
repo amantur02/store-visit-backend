@@ -44,3 +44,10 @@ async def get_orders_usecase(db_session: Session, filters: OrderFilter, user: Us
     order_repos = OrderRepository(db_session)
     return await order_repos.get_products(filters, user)
 
+
+async def update_order_usecase(db_session: Session, order: Order) -> Order:
+    order_repo = OrderRepository(db_session)
+    order = await order_repo.update_order(order)
+    print(order)
+    return order
+

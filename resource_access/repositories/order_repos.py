@@ -1,8 +1,9 @@
 import logging
 from typing import List
 
+from psycopg2.errorcodes import FOREIGN_KEY_VIOLATION
 from pydantic.tools import parse_obj_as
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -37,6 +38,7 @@ class OrderRepository:
                 f"Error while creating Organization. Details: {error.orig.args}"
             )
             await self._db_session.rollback()
+            await self.__integrity_error_handler(error, order)
 
     async def get_products(self, filters: OrderFilter, user: User) -> List[Order]:
         where_args = [
@@ -56,6 +58,48 @@ class OrderRepository:
 
         query = await self._db_session.execute(stmt)
         return parse_obj_as(List[Order], query.scalars().all())
+
+    async def update_order(self, order: Order) -> Order:
+        await self._get_order_by_id(order.id)
+        try:
+            query = await self._db_session.execute(
+                update(OrderDB)
+                .where(OrderDB.id == order.id)
+                .values(**order.model_dump(exclude_unset=True, exclude={"id", "created_at", "customer_id", "status"}))
+                .returning(OrderDB)
+            )
+            await self._db_session.commit()
+            order_db, = query.one()  # Unpacking the tuple
+            return Order.model_validate(order_db)
+        except IntegrityError as error:
+            logger.error(
+                f"Error while updating Order. Details: {error.orig.args}"
+            )
+            await self._db_session.rollback()
+            await self.__integrity_error_handler(error, order)
+
+    async def _get_order_by_id(self, order_id: int) -> Order:
+        stmt = select(OrderDB).where(
+            OrderDB.id == order_id, OrderDB.is_deleted.is_(False)
+        )
+
+        query = await self._db_session.execute(stmt)
+        order_db = query.scalar()
+
+        if order_db:
+            return order_db
+        raise NotFoundException(f"There is no order with this id: {order_id}")
+
+    async def __integrity_error_handler(self, e, order) -> None:
+        if e.orig.sqlstate == FOREIGN_KEY_VIOLATION:
+            if "worker_id" in e.orig.args[0]:
+                raise NotFoundException(
+                    f"Does not worker with id: {order.worker_id}"
+                )
+            if "store_id" in e.orig.args[0]:
+                raise NotFoundException(
+                    f"Does not store with id: {order.store_id}"
+                )
 
 
 class StoreRepository:

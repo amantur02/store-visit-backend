@@ -7,9 +7,9 @@ from starlette.responses import JSONResponse
 
 from api.depends import get_session, get_current_user, get_current_customer
 from exceptions import NotFoundException, DataValidationException
-from schemas.order_schemas import OrderOut, OrderIn, Order, OrderFilter
+from schemas.order_schemas import OrderOut, OrderIn, Order, OrderFilter, OrderUpdateIn
 from schemas.user_schemas import User
-from usecases.customer_usecases import create_order_usecase, get_orders_usecase
+from usecases.customer_usecases import create_order_usecase, get_orders_usecase, update_order_usecase
 
 router = APIRouter()
 
@@ -60,3 +60,26 @@ async def get_orders(
             status_code=status.HTTP_400_BAD_REQUEST,
             content={'message': e.message, 'error_code': e.error_code},
         )
+
+
+@router.patch(
+    "/orders/{order_id}/",
+    status_code=status.HTTP_200_OK,
+    description="Update order",
+    response_model=OrderOut,
+)
+async def update_order(
+        order_id: int,
+        order_in: OrderUpdateIn,
+        db_session: Session = Depends(get_session)
+):
+    order = Order(**order_in.model_dump(exclude_unset=True))
+    order.id = order_id
+    try:
+        return await update_order_usecase(db_session, order)
+    except NotFoundException as e:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={'message': e.message, 'error_code': e.error_code}
+        )
+
