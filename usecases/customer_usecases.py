@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 
 from sqlalchemy.orm import Session
 
@@ -6,7 +7,7 @@ from engines.auth_engines import AuthenticationEngine
 from exceptions import DataValidationException
 from resource_access.repositories.order_repos import OrderRepository, StoreRepository
 from resource_access.repositories.user_repos import UserRepository
-from schemas.order_schemas import Order
+from schemas.order_schemas import Order, OrderFilter
 from core.jwt_tokens import create_access_token, create_refresh_token
 from schemas.user_schemas import User
 
@@ -37,3 +38,9 @@ async def create_order_usecase(db_session: Session, order: Order, user: User) ->
     order.expires_at = order.expires_at.replace(tzinfo=None)
     order_repos = OrderRepository(db_session)
     return await order_repos.create_order(order)
+
+
+async def get_orders_usecase(db_session: Session, filters: OrderFilter, user: User) -> List[Order]:
+    order_repos = OrderRepository(db_session)
+    return await order_repos.get_products(filters, user)
+

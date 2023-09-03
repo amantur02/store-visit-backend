@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel
 
@@ -46,3 +46,8 @@ class OrderOut(BaseModel):
     customer_id: int
     status: OrderStatusEnum
     worker_id: int
+
+
+class OrderFilter(BaseModel):
+    my_order: bool
+    status: OrderStatusEnum
