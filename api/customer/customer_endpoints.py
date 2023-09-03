@@ -8,10 +8,10 @@ from starlette.responses import JSONResponse
 from api.depends import get_session, get_current_user, get_current_customer
 from exceptions import NotFoundException, DataValidationException
 from schemas.auth_schemas import SuccessResponse
-from schemas.order_schemas import OrderOut, OrderIn, Order, OrderFilter, OrderUpdateIn
+from schemas.order_schemas import OrderOut, OrderIn, Order, OrderFilter, OrderUpdateIn, StoreOut, StoreFilter
 from schemas.user_schemas import User
 from usecases.customer_usecases import create_order_usecase, get_orders_usecase, update_order_usecase, \
-    delete_order_usecase
+    delete_order_usecase, get_stores_usecase
 
 router = APIRouter()
 
@@ -105,3 +105,21 @@ async def delete_order(
             content={"message": e.message, "error_code": e.error_code},
         )
 
+
+@router.get(
+    "/stores/",
+    status_code=status.HTTP_200_OK,
+    description="List store with filter id and title",
+    response_model=List[StoreOut],
+)
+async def get_stores(
+        filters: StoreFilter = Depends(),
+        db_session: Session = Depends(get_session),
+):
+    try:
+        return await get_stores_usecase(db_session, filters)
+    except DataValidationException as e:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={'message': e.message, 'error_code': e.error_code},
+        )

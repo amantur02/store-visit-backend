@@ -31,6 +31,16 @@ class Store(BaseModel):
         from_attributes = True
 
 
+class StoreOut(BaseModel):
+    id: int
+    title: str
+
+
+class StoreFilter(BaseModel):
+    id: Optional[int] = None
+    title: Optional[str] = None
+
+
 expires_at = datetime(2023, 9, 3, 9, 29, 6, tzinfo=timezone.utc)
 
 

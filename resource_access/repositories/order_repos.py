@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from exceptions import NotFoundException
 from resource_access.db_models.order_models import OrderDB, StoreDB
 from schemas.enums import UserRoleEnum
-from schemas.order_schemas import Order, Store, OrderFilter
+from schemas.order_schemas import Order, Store, OrderFilter, StoreFilter
 from schemas.user_schemas import User
 
 logger = logging.getLogger(__name__)
@@ -40,7 +40,7 @@ class OrderRepository:
             await self._db_session.rollback()
             await self.__integrity_error_handler(error, order)
 
-    async def get_products(self, filters: OrderFilter, user: User) -> List[Order]:
+    async def get_orders(self, filters: OrderFilter, user: User) -> List[Order]:
         where_args = [
             OrderDB.is_deleted.is_(False),
             OrderDB.status == filters.status
@@ -128,3 +128,20 @@ class StoreRepository:
             return product_db
         raise NotFoundException(f"Does not store with id: {store_id}")
 
+    async def get_stores(self, filters: StoreFilter) -> List[Store]:
+        where_args = [StoreDB.is_deleted.is_(False)]
+
+        if filters.id is not None:
+            where_args.append(StoreDB.id == filters.id)
+
+        if filters.title:
+            where_args.append(StoreDB.title.like(f"%{filters.title}%"))
+
+        stmt = (
+            select(StoreDB)
+            .where(*where_args)
+            .order_by(StoreDB.id.desc())
+        )
+
+        query = await self._db_session.execute(stmt)
+        return parse_obj_as(List[Store], query.scalars().all())
