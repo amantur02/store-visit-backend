@@ -6,11 +6,12 @@ from starlette import status
 from jose import jwt
 
 from core.config import settings
-from core.constants import JWT_ALGORITHM, INVALID_AUTHENTICATION_CREDENTIALS
-from exceptions import NotFoundException
+from core.constants import JWT_ALGORITHM, INVALID_AUTHENTICATION_CREDENTIALS, PERMISSION_DENIED_MESSAGE
+from exceptions import NotFoundException, StoreVisitHTTPException
 from resource_access.db_session import AsyncSessionLocal
 from resource_access.repositories.user_repos import UserRepository
 from schemas.auth_schemas import TokenPayload
+from schemas.enums import UserRoleEnum
 from schemas.user_schemas import User
 
 oauth2_schema = OAuth2PasswordBearer(
@@ -59,3 +60,15 @@ async def get_current_user(
             detail=INVALID_AUTHENTICATION_CREDENTIALS,
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
+async def get_current_customer(
+        user: User = Depends(get_current_user)
+) -> User:
+    if user.role == UserRoleEnum.customer:
+        return user
+
+    raise StoreVisitHTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        message=PERMISSION_DENIED_MESSAGE,
+    )

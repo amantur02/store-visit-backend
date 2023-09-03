@@ -30,3 +30,8 @@ class AuthenticationError(StoreVisitException):
 class AlreadyExistsException(StoreVisitException):
     message = "Already Exists"
     error_code = "DataAlreadyExistsError"
+
+
+class DataValidationException(StoreVisitException):
+    default_message = "Data entered incorrectly"
+    error_code = "IncorrectDataException"

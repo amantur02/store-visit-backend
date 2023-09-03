@@ -31,7 +31,7 @@ class OrderDB(Base):
     expires_at = Column(TIMESTAMP)
     store_id = Column(Integer, ForeignKey("stores.id", ondelete="RESTRICT"), nullable=False)
     customer_id = Column(Integer, ForeignKey("users.id", ondelete="RESTRICT"), nullable=False)
-    status = Column(ENUM(OrderStatusEnum, name="order_status_enum"))
+    status = Column(ENUM(OrderStatusEnum, name="order_status_enum"),default=OrderStatusEnum.started, server_default=OrderStatusEnum.started)
     worker_id = Column(Integer, ForeignKey("users.id", ondelete="RESTRICT"), nullable=False)
 
 

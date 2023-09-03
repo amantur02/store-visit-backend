@@ -1,9 +1,10 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 from pydantic import BaseModel
 
 from schemas.enums import OrderStatusEnum
+from schemas.user_schemas import User
 
 
 class Order(BaseModel):
@@ -13,16 +14,28 @@ class Order(BaseModel):
     store_id: Optional[int] = None
     customer_id: Optional[int] = None
     status: Optional[OrderStatusEnum] = None
-    worked_id: Optional[int] = None
+    worker_id: Optional[int] = None
 
     class Config:
         from_attributes = True
 
 
+class Store(BaseModel):
+    id: Optional[int] = None
+    title: Optional[str] = None
+    users: Optional[User] = None
+
+    class Config:
+        from_attributes = True
+
+
+expires_at = datetime(2023, 9, 3, 9, 29, 6, tzinfo=timezone.utc)
+
+
 class OrderIn(BaseModel):
     expires_at: datetime
     store_id: int
-    worked_id: int
+    worker_id: int
 
 
 class OrderOut(BaseModel):
@@ -32,5 +45,4 @@ class OrderOut(BaseModel):
     store_id: int
     customer_id: int
     status: OrderStatusEnum
-    worked_id: int
-
+    worker_id: int

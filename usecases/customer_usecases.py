@@ -1,10 +1,14 @@
+from datetime import datetime
+
 from sqlalchemy.orm import Session
 
 from engines.auth_engines import AuthenticationEngine
-from resource_access.repositories.order_repos import OrderRepository
+from exceptions import DataValidationException
+from resource_access.repositories.order_repos import OrderRepository, StoreRepository
 from resource_access.repositories.user_repos import UserRepository
 from schemas.order_schemas import Order
 from core.jwt_tokens import create_access_token, create_refresh_token
+from schemas.user_schemas import User
 
 
 async def user_login_usecase(db_session: Session, username: str, password: str):
@@ -20,7 +24,16 @@ async def user_login_usecase(db_session: Session, username: str, password: str):
     }
 
 
-async def create_order_usecase(db_session: Session, order: Order) -> Order:
-    order_repos = OrderRepository(db_session)
+async def create_order_usecase(db_session: Session, order: Order, user: User) -> Order:
+    store_repos = StoreRepository(db_session)
+    store = await store_repos.get_store_by_id(order.store_id)
 
+    if user.store_id != order.store_id:
+        raise DataValidationException(message="You cannot create an order for another store")
+    if order.worker_id not in [user.id for user in store.users]:
+        raise DataValidationException(message="You cannot create an order for employee from another store")
+
+    order.customer_id = user.id
+    order.expires_at = order.expires_at.replace(tzinfo=None)
+    order_repos = OrderRepository(db_session)
     return await order_repos.create_order(order)
