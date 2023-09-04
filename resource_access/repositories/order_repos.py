@@ -99,18 +99,6 @@ class OrderRepository:
             return order_db
         raise NotFoundException(f"There is no order with this id: {order_id}")
 
-    # async def update_order_status(self, order: Order) -> Order:
-    #     await self.get_order_by_id(order.id)
-    #     query = await self._db_session.execute(
-    #         update(OrderDB)
-    #         .where(OrderDB.id == order.id)
-    #         .values(status=order.status)
-    #         .returning(OrderDB)
-    #     )
-    #     await self._db_session.commit()
-    #     order_db, = query.one()
-    #     return Order.model_validate(order_db)
-
     async def __integrity_error_handler(self, e, order) -> None:
         if e.orig.sqlstate == FOREIGN_KEY_VIOLATION:
             if "worker_id" in e.orig.args[0]:

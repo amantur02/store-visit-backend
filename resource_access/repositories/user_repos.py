@@ -1,4 +1,6 @@
 import logging
+from typing import List
+from pydantic.tools import parse_obj_as
 
 from psycopg2.errorcodes import UNIQUE_VIOLATION
 from sqlalchemy import select
@@ -7,8 +9,7 @@ from sqlalchemy.orm import Session
 
 from exceptions import NotFoundException, AlreadyExistsException
 from resource_access.db_models.user_models import UserDB
-from schemas.user_schemas import User
-
+from schemas.user_schemas import User, UserFilter
 
 logger = logging.getLogger(__name__)
 
@@ -60,3 +61,21 @@ class UserRepository:
         if user_db:
             return User.model_validate(user_db)
         raise NotFoundException(f"Not found user with id: {user_id}")
+
+    async def get_users(self, filters: UserFilter) -> List[User]:
+        where_args = [
+            UserDB.is_deleted.is_(False),
+        ]
+        if filters.first_name:
+            where_args.append(UserDB.first_name == filters.first_name)
+        elif filters.username:
+            where_args.append(UserDB.username == filters.username)
+
+        stmt = (
+            select(UserDB)
+            .where(*where_args)
+            .order_by(UserDB.id.desc())
+        )
+
+        query = await self._db_session.execute(stmt)
+        return parse_obj_as(List[User], query.scalars().all())

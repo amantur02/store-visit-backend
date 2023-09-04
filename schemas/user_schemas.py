@@ -34,3 +34,8 @@ class UserOut(BaseModel):
 class UserLoginIn(BaseModel):
     username: str
     password: str
+
+
+class UserFilter(BaseModel):
+    first_name: Optional[str] = None
+    username: Optional[str] = None
