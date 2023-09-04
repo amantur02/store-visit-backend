@@ -9,10 +9,10 @@ from api.depends import get_session, get_current_user, get_current_customer
 from exceptions import NotFoundException, DataValidationException, AccessDeniedException
 from schemas.auth_schemas import SuccessResponse
 from schemas.order_schemas import OrderOut, OrderIn, Order, OrderFilter, OrderUpdateIn, StoreOut, StoreFilter, VisitOut, \
-    VisitIn, Visit
+    VisitIn, Visit, VisitFilter
 from schemas.user_schemas import User
 from usecases.customer_usecases import create_order_usecase, get_orders_usecase, update_order_usecase, \
-    delete_order_usecase, get_stores_usecase, create_visit_usecase
+    delete_order_usecase, get_stores_usecase, create_visit_usecase, get_visits_usecase
 
 router = APIRouter()
 
@@ -153,3 +153,21 @@ async def create_visit(
             content={'message': e.message, 'error_code': e.error_code},
         )
 
+
+@router.get(
+    "/visits/",
+    status_code=status.HTTP_200_OK,
+    description="List visits",
+    response_model=List[VisitOut]
+)
+async def get_visits(
+        filters: VisitFilter = Depends(),
+        db_session: Session = Depends(get_session)
+):
+    try:
+        return await get_visits_usecase(db_session, filters)
+    except DataValidationException as e:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={'message': e.message, 'error_code': e.error_code},
+        )

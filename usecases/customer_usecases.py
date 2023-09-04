@@ -9,7 +9,7 @@ from exceptions import DataValidationException, TimeIsUpException, AccessDeniedE
 from resource_access.repositories.order_repos import OrderRepository, StoreRepository, VisitRepository
 from resource_access.repositories.user_repos import UserRepository
 from schemas.enums import OrderStatusEnum
-from schemas.order_schemas import Order, OrderFilter, StoreFilter, Store, Visit
+from schemas.order_schemas import Order, OrderFilter, StoreFilter, Store, Visit, VisitFilter
 from core.jwt_tokens import create_access_token, create_refresh_token
 from schemas.user_schemas import User
 
@@ -75,3 +75,9 @@ async def create_visit_usecase(db_session: Session, user: User, visit: Visit) ->
 
     visit.worker_id = order.worker_id
     return await store_repos.create_visit(visit)
+
+
+async def get_visits_usecase(db_session: Session, filters: VisitFilter) -> List[Visit]:
+    visit_repo = VisitRepository(db_session)
+    return await visit_repo.get_visits(filters)
+

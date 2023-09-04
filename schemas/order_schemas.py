@@ -101,3 +101,7 @@ class VisitOut(BaseModel):
 
 class VisitIn(BaseModel):
     order_id: int
+
+
+class VisitFilter(BaseModel):
+    order_id: Optional[int] = None
