@@ -81,3 +81,13 @@ async def get_visits_usecase(db_session: Session, filters: VisitFilter) -> List[
     visit_repo = VisitRepository(db_session)
     return await visit_repo.get_visits(filters)
 
+
+async def delete_visit_usecase(db_session: Session, visit_id: int) -> None:
+    visit_repo = VisitRepository(db_session)
+    return await visit_repo.delete_visit(visit_id)
+
+
+async def update_order_status_usecase(db_session: Session, order: Order) -> Order:
+    order_repo = OrderRepository(db_session)
+    return await order_repo.update_order(order)
+

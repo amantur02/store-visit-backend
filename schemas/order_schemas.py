@@ -78,6 +78,15 @@ class OrderUpdateIn(BaseModel):
         return data
 
 
+class OrderUpdateStatusIn(BaseModel):
+    status: OrderStatusEnum
+
+
+class OrderUpdateStatusOut(BaseModel):
+    id: int
+    status: OrderStatusEnum
+
+
 class Visit(BaseModel):
     id: Optional[int] = None
     created_at: Optional[datetime] = None

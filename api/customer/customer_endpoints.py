@@ -8,11 +8,13 @@ from starlette.responses import JSONResponse
 from api.depends import get_session, get_current_user, get_current_customer
 from exceptions import NotFoundException, DataValidationException, AccessDeniedException
 from schemas.auth_schemas import SuccessResponse
+from schemas.enums import OrderStatusEnum
 from schemas.order_schemas import OrderOut, OrderIn, Order, OrderFilter, OrderUpdateIn, StoreOut, StoreFilter, VisitOut, \
-    VisitIn, Visit, VisitFilter
+    VisitIn, Visit, VisitFilter, OrderUpdateStatusOut, OrderUpdateStatusIn
 from schemas.user_schemas import User
 from usecases.customer_usecases import create_order_usecase, get_orders_usecase, update_order_usecase, \
-    delete_order_usecase, get_stores_usecase, create_visit_usecase, get_visits_usecase
+    delete_order_usecase, get_stores_usecase, create_visit_usecase, get_visits_usecase, delete_visit_usecase, \
+    update_order_status_usecase
 
 router = APIRouter()
 
@@ -170,4 +172,45 @@ async def get_visits(
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
             content={'message': e.message, 'error_code': e.error_code},
+        )
+
+
+@router.delete(
+    "/visit/{visit_id}/",
+    status_code=status.HTTP_200_OK,
+    description="Delete visit",
+    response_model=SuccessResponse,
+)
+async def delete_order(
+        visit_id: int,
+        db_session: Session = Depends(get_session)
+):
+    try:
+        await delete_visit_usecase(db_session, visit_id)
+        return SuccessResponse(message=f"Visit with id {visit_id} deleted")
+    except NotFoundException as e:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"message": e.message, "error_code": e.error_code},
+        )
+
+
+@router.put(
+    "/order/{order_id}/status/",
+    status_code=status.HTTP_200_OK,
+    description="Change order status",
+    response_model=OrderUpdateStatusOut
+)
+async def update_order_status(
+        order_id: int,
+        order_status_in: OrderUpdateStatusIn,
+        db_session: Session = Depends(get_session)
+):
+    order = Order(id=order_id, status=order_status_in.status)
+    try:
+        return await update_order_status_usecase(db_session, order)
+    except NotFoundException as e:
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"message": e.message, "error_code": e.error_code},
         )

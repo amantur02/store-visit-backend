@@ -65,7 +65,7 @@ class OrderRepository:
             query = await self._db_session.execute(
                 update(OrderDB)
                 .where(OrderDB.id == order.id)
-                .values(**order.model_dump(exclude_unset=True, exclude={"id", "created_at", "customer_id", "status"}))
+                .values(**order.model_dump(exclude_unset=True, exclude={"id", "created_at"}))
                 .returning(OrderDB)
             )
             await self._db_session.commit()
@@ -98,6 +98,18 @@ class OrderRepository:
         if order_db:
             return order_db
         raise NotFoundException(f"There is no order with this id: {order_id}")
+
+    # async def update_order_status(self, order: Order) -> Order:
+    #     await self.get_order_by_id(order.id)
+    #     query = await self._db_session.execute(
+    #         update(OrderDB)
+    #         .where(OrderDB.id == order.id)
+    #         .values(status=order.status)
+    #         .returning(OrderDB)
+    #     )
+    #     await self._db_session.commit()
+    #     order_db, = query.one()
+    #     return Order.model_validate(order_db)
 
     async def __integrity_error_handler(self, e, order) -> None:
         if e.orig.sqlstate == FOREIGN_KEY_VIOLATION:
@@ -195,6 +207,15 @@ class VisitRepository:
 
         query = await self._db_session.execute(stmt)
         return parse_obj_as(List[Visit], query.scalars().all())
+
+    async def delete_visit(
+        self, visit_id: int
+    ) -> None:
+        visit_db = await self.get_visit_by_order_id(
+            visit_id
+        )
+        visit_db.is_deleted = True
+        await self._db_session.commit()
 
     async def __integrity_error_handler(self, e, visit: Visit) -> None:
         if e.orig.sqlstate == FOREIGN_KEY_VIOLATION:
