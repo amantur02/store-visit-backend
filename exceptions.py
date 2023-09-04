@@ -35,3 +35,13 @@ class AlreadyExistsException(StoreVisitException):
 class DataValidationException(StoreVisitException):
     default_message = "Data entered incorrectly"
     error_code = "IncorrectDataException"
+
+
+class TimeIsUpException(StoreVisitException):
+    default_message = "Receiving time up"
+    error_code = "TimeIsUpException"
+
+
+class AccessDeniedException(StoreVisitException):
+    default_message = "Access Denied"
+    error_code = "AccessDenied"

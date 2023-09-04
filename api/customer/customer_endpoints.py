@@ -6,12 +6,13 @@ from starlette import status
 from starlette.responses import JSONResponse
 
 from api.depends import get_session, get_current_user, get_current_customer
-from exceptions import NotFoundException, DataValidationException
+from exceptions import NotFoundException, DataValidationException, AccessDeniedException
 from schemas.auth_schemas import SuccessResponse
-from schemas.order_schemas import OrderOut, OrderIn, Order, OrderFilter, OrderUpdateIn, StoreOut, StoreFilter
+from schemas.order_schemas import OrderOut, OrderIn, Order, OrderFilter, OrderUpdateIn, StoreOut, StoreFilter, VisitOut, \
+    VisitIn, Visit
 from schemas.user_schemas import User
 from usecases.customer_usecases import create_order_usecase, get_orders_usecase, update_order_usecase, \
-    delete_order_usecase, get_stores_usecase
+    delete_order_usecase, get_stores_usecase, create_visit_usecase
 
 router = APIRouter()
 
@@ -123,3 +124,32 @@ async def get_stores(
             status_code=status.HTTP_400_BAD_REQUEST,
             content={'message': e.message, 'error_code': e.error_code},
         )
+
+
+@router.post(
+    "/create-visit/",
+    status_code=status.HTTP_201_CREATED,
+    description="Create visit only customer",
+    dependencies=[Depends(get_current_customer)],
+    response_model=VisitOut
+)
+async def create_visit(
+        visit_in: VisitIn,
+        db_session: Session = Depends(get_session),
+        user: User = Depends(get_current_user),
+):
+    visit = Visit(**visit_in.model_dump(exclude_unset=True))
+    visit.customer_id = user.id
+    try:
+        return await create_visit_usecase(db_session, user, visit)
+    except AccessDeniedException as e:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={'message': e.message, 'error_code': e.error_code},
+        )
+    except DataValidationException as e:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={'message': e.message, 'error_code': e.error_code},
+        )
+

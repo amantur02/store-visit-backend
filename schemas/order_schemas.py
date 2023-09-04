@@ -76,3 +76,28 @@ class OrderUpdateIn(BaseModel):
         if all(value is None for value in data.values()):
             raise DataValidationException("At least one field must be provided")
         return data
+
+
+class Visit(BaseModel):
+    id: Optional[int] = None
+    created_at: Optional[datetime] = None
+    worker_id: Optional[int] = None
+    order_id: Optional[int] = None
+    customer_id: Optional[int] = None
+    store_id: Optional[int] = None
+
+    class Config:
+        from_attributes = True
+
+
+class VisitOut(BaseModel):
+    id: int
+    created_at: datetime
+    worker_id: int
+    order_id: int
+    customer_id: int
+    store_id: int
+
+
+class VisitIn(BaseModel):
+    order_id: int
