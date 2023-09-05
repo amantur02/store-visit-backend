@@ -61,8 +61,8 @@ class OrderOut(BaseModel):
 
 
 class OrderFilter(BaseModel):
-    my_order: bool
-    status: OrderStatusEnum
+    my_order: Optional[bool] = None
+    status: Optional[OrderStatusEnum] = None
 
 
 class OrderUpdateIn(BaseModel):

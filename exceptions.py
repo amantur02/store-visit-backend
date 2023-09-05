@@ -34,7 +34,7 @@ class AlreadyExistsException(StoreVisitException):
 
 class DataValidationException(StoreVisitException):
     default_message = "Data entered incorrectly"
-    error_code = "IncorrectDataException"
+    error_code = "IncorrectDataError"
 
 
 class TimeIsUpException(StoreVisitException):
