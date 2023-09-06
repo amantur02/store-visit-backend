@@ -54,8 +54,8 @@ class Settings(BaseSettings):
     project_name: str = "StoreVisit"
     default_pagination_limit: int = 20
 
-    async_pool_size: int = 5
-    async_max_overflow: int = 0
+    async_pool_size: int = 20
+    async_max_overflow: int = 10
     async_pool_recycle: int = -1
 
     sync_pool_size: int = 5

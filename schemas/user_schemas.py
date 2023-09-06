@@ -25,6 +25,7 @@ class UserIn(BaseModel):
 
 
 class UserOut(BaseModel):
+    id: int
     username: str
     first_name: str
     role: UserRoleEnum
